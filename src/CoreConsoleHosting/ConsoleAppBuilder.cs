@@ -32,7 +32,7 @@ namespace CoreConsoleHosting
 
     public class ConsoleAppBuilder : IConsoleAppBuilder
     {
-        public IConfiguration Configuration { get; }
+        public IConfiguration _config;
         private bool _consoleAppBuilt;
         private readonly List<Action<IConfiguration, IServiceCollection>> _configureServicesDelegates;
         private List<Action<WebHostBuilderContext, IConfigurationBuilder>> _configureAppConfigurationBuilderDelegates;
@@ -41,6 +41,8 @@ namespace CoreConsoleHosting
         private WebHostOptions _options;
 
         public IConsoleStartup Startup { get; set; }
+        public IConfiguration Configuration { get { return _context?.Configuration; } }
+
 
         /// <summary>
         /// 
@@ -51,7 +53,7 @@ namespace CoreConsoleHosting
             _configureServicesDelegates = new List<Action<IConfiguration, IServiceCollection>>();
             _configureAppConfigurationBuilderDelegates = new List<Action<WebHostBuilderContext, IConfigurationBuilder>>();
 
-            Configuration = new ConfigurationBuilder()
+            _config = new ConfigurationBuilder()
                 .AddEnvironmentVariables(prefix: "ASPNETCORE_")
                 .Build();
 
@@ -64,7 +66,7 @@ namespace CoreConsoleHosting
 
             _context = new WebHostBuilderContext
             {
-                Configuration = Configuration
+                Configuration = _config
             };
         }
 
@@ -75,7 +77,7 @@ namespace CoreConsoleHosting
         /// <returns>The value the setting currently contains.</returns>
         public string GetSetting(string key)
         {
-            return Configuration[key];
+            return _config[key];
         }
 
         /// <summary>
@@ -86,7 +88,7 @@ namespace CoreConsoleHosting
         /// <returns>The <see cref="IWebHostBuilder"/>.</returns>
         public IConsoleAppBuilder UseSetting(string key, string value)
         {
-            Configuration[key] = value;
+            _config[key] = value;
             return this;
         }
 
@@ -108,7 +110,7 @@ namespace CoreConsoleHosting
             IConsoleApp host = new Hosting.Internal.ConsoleApp(
                 hostingServices,
                 hostingServiceProvider,
-                Configuration,
+                _config,
                 _options,
                 hostingStartupErrors);
             try
@@ -148,7 +150,7 @@ namespace CoreConsoleHosting
         {
             hostingStartupErrors = null;
 
-            _options = new WebHostOptions(Configuration);
+            _options = new WebHostOptions(_config);
 
             var services = new ServiceCollection();
 
@@ -164,7 +166,7 @@ namespace CoreConsoleHosting
 
             var builder = new ConfigurationBuilder()
                .SetBasePath(Environment.ContentRootPath)
-               .AddConfiguration(Configuration);
+               .AddConfiguration(_config);
 
             foreach (var configureAppConfiguration in _configureAppConfigurationBuilderDelegates)
             {
@@ -184,7 +186,7 @@ namespace CoreConsoleHosting
 
             foreach (var configureServices in _configureServicesDelegates)
             {
-                configureServices(Configuration, services);
+                configureServices(_config, services);
             }
 
             return services;

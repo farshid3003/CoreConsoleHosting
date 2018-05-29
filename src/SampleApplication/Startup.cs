@@ -25,6 +25,8 @@ namespace SampleApplication
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            string sampleConfig = Configuration["SampleConfig"];
+            string genericConfig = Configuration["GenericConfig"];
             //services.AddSingleton<IService, Service>();
         }
 
