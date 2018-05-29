@@ -1,6 +1,13 @@
 # CoreConsoleHosting
 Dotnet Core Console Appplication hosting. Add Startup like AspNet Core
 
+Install Nuget Package
+
+```
+Install-Package CoreConsoleHosting 
+```
+
+Add the following code in your program.cs file
 
 ```
     class Program
@@ -18,7 +25,7 @@ Dotnet Core Console Appplication hosting. Add Startup like AspNet Core
 
 ```
 
-
+Add a new Startup.cs file and copy followin content on it. 
 
 ```
     /// <summary>
