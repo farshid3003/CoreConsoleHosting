@@ -26,12 +26,13 @@ namespace CoreConsoleHosting
         IConsoleAppBuilder ConfigureServices(Action<IServiceCollection> configureServices);
         IConsoleAppBuilder ConfigureServices(Action<IConfiguration, IServiceCollection> configureServices);
         IConsoleAppBuilder ConfigureAppConfiguration(Action<WebHostBuilderContext, IConfigurationBuilder> configureDelegate);
-        HostingEnvironment Environment { get;  }
+        HostingEnvironment Environment { get; }
+        IConfiguration Configuration { get; }
     }
 
     public class ConsoleAppBuilder : IConsoleAppBuilder
     {
-        private IConfiguration _config;
+        public IConfiguration Configuration { get; }
         private bool _consoleAppBuilt;
         private readonly List<Action<IConfiguration, IServiceCollection>> _configureServicesDelegates;
         private List<Action<WebHostBuilderContext, IConfigurationBuilder>> _configureAppConfigurationBuilderDelegates;
@@ -50,7 +51,7 @@ namespace CoreConsoleHosting
             _configureServicesDelegates = new List<Action<IConfiguration, IServiceCollection>>();
             _configureAppConfigurationBuilderDelegates = new List<Action<WebHostBuilderContext, IConfigurationBuilder>>();
 
-            _config = new ConfigurationBuilder()
+            Configuration = new ConfigurationBuilder()
                 .AddEnvironmentVariables(prefix: "ASPNETCORE_")
                 .Build();
 
@@ -63,7 +64,7 @@ namespace CoreConsoleHosting
 
             _context = new WebHostBuilderContext
             {
-                Configuration = _config
+                Configuration = Configuration
             };
         }
 
@@ -74,7 +75,7 @@ namespace CoreConsoleHosting
         /// <returns>The value the setting currently contains.</returns>
         public string GetSetting(string key)
         {
-            return _config[key];
+            return Configuration[key];
         }
 
         /// <summary>
@@ -85,7 +86,7 @@ namespace CoreConsoleHosting
         /// <returns>The <see cref="IWebHostBuilder"/>.</returns>
         public IConsoleAppBuilder UseSetting(string key, string value)
         {
-            _config[key] = value;
+            Configuration[key] = value;
             return this;
         }
 
@@ -107,7 +108,7 @@ namespace CoreConsoleHosting
             IConsoleApp host = new Hosting.Internal.ConsoleApp(
                 hostingServices,
                 hostingServiceProvider,
-                _config,
+                Configuration,
                 _options,
                 hostingStartupErrors);
             try
@@ -116,7 +117,7 @@ namespace CoreConsoleHosting
 
                 return host;
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 // Dispose the host if there's a failure to initialize, this should clean up
                 // will dispose services that were constructed until the exception was thrown
@@ -147,10 +148,10 @@ namespace CoreConsoleHosting
         {
             hostingStartupErrors = null;
 
-            _options = new WebHostOptions(_config);
+            _options = new WebHostOptions(Configuration);
 
             var services = new ServiceCollection();
-  
+
 
             var contentRootPath = ResolveContentRootPath(_options.ContentRootPath, AppContext.BaseDirectory);
 
@@ -163,7 +164,7 @@ namespace CoreConsoleHosting
 
             var builder = new ConfigurationBuilder()
                .SetBasePath(Environment.ContentRootPath)
-               .AddConfiguration(_config);
+               .AddConfiguration(Configuration);
 
             foreach (var configureAppConfiguration in _configureAppConfigurationBuilderDelegates)
             {
@@ -183,7 +184,7 @@ namespace CoreConsoleHosting
 
             foreach (var configureServices in _configureServicesDelegates)
             {
-                configureServices(_config, services);
+                configureServices(Configuration, services);
             }
 
             return services;
@@ -268,5 +269,5 @@ namespace CoreConsoleHosting
         }
     }
 
- 
+
 }

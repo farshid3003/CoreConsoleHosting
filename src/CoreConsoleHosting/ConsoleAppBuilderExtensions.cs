@@ -22,6 +22,8 @@ namespace CoreConsoleHosting
                 {
                     hostBuilder.Startup = new TStartup();
                     hostBuilder.Startup.Environment = hostBuilder.Environment;
+                    hostBuilder.Startup.Configuration = hostBuilder.Configuration;
+
                     hostBuilder.Startup.ConfigureServices(services);
                     services.AddSingleton(typeof(IConsoleStartup), sp =>
                     {
