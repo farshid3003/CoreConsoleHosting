@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using SampleApplication.Business;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,7 +29,8 @@ namespace SampleApplication
         {
             string sampleConfig = Configuration["SampleConfig"];
             string genericConfig = Configuration["GenericConfig"];
-            //services.AddSingleton<IService, Service>();
+
+            services.AddSingleton<IBiz, Biz>();
         }
 
         /// <summary>
@@ -37,6 +40,13 @@ namespace SampleApplication
         public void Configure(IServiceProvider serviceProvider)
         {
             //serviceProvider.UserSomething();
+
+            ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            loggerFactory.AddConsole();
+
+
+            IBiz biz = serviceProvider.GetService<IBiz>();
+            biz.Run();
         }
     }
 }
