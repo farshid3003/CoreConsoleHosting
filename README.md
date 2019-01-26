@@ -1,5 +1,6 @@
 # CoreConsoleHosting
 Dotnet Core Console Appplication hosting. Add Startup like AspNet Core
+Using Dotnet Core Dependency Injection Logger and other stuffs in a console application
 
 Install Nuget Package
 
